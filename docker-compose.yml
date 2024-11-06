@@ -1,0 +1,30 @@
+
+services:
+  # Serviço para o MySQL
+  db:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword  # Senha do usuário root
+      MYSQL_DATABASE: password_manager  # Nome do banco de dados
+    ports:
+      - "3306:3306"  # Mapeia a porta 3306 do container para a 3306 do host
+    volumes:
+      - ./init:/docker-entrypoint-initdb.d  # Mapeia o diretório init com os scripts SQL
+    networks:
+      - password-manager-network
+
+  # Serviço para o backend Node.js
+  app:
+    build: .
+    ports:
+      - "3000:3000"  # Mapeia a porta 3000 do container para a 3000 do host
+    depends_on:
+      - db  # Garante que o db seja iniciado antes do app
+    volumes:
+      - .:/app  # Monta o diretório atual dentro do container
+    networks:
+      - password-manager-network
+
+networks:
+  password-manager-network:
+    driver: bridge
